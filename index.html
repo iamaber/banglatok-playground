@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bangla Tokenizer Playground</title>
+    <meta
+      name="description"
+      content="Paste Bangla, Banglish or code-mixed text and compare token counts across Bangla-capable tokenizers in your browser."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <p class="eyebrow">banglatok · tokenizer comparison</p>
+        <h1>Bangla Tokenizer Playground</h1>
+        <p class="lede">
+          Paste Bangla, Banglish, English or code-mixed text. Every tokenizer
+          below sees the same NFC/whitespace-normalized input, and the table
+          reports exact token counts, sequence length, round-trip losslessness
+          and single-threaded encode time.
+        </p>
+        <p class="hero-links">
+          <a href="https://huggingface.co/iamaber/banglatok-bn-bpe-58k">bn-bpe-58k</a>
+          <span>·</span>
+          <a href="https://huggingface.co/iamaber/banglatok-bn-bpe-28k">bn-bpe-28k</a>
+          <span>·</span>
+          <a href="https://huggingface.co/datasets/iamaber/banglatok-training-corpus">training corpus</a>
+          <span>·</span>
+          <a href="https://github.com/iamaber/banglatok">banglatok</a>
+        </p>
+      </header>
+
+      <main>
+        <section class="card input-card" aria-labelledby="input-heading">
+          <div class="card-head">
+            <h2 id="input-heading">Text to compare</h2>
+            <span id="status" class="status" role="status" aria-live="polite">
+              Ready
+            </span>
+          </div>
+
+          <label class="sr-only" for="text">Text to tokenize</label>
+          <textarea id="text" rows="6" spellcheck="false">আমি বাংলায় গান গাই।
+ami banglay gaan gai!
+meetingটা ১০টায়, don't be late 🙂</textarea>
+
+          <div class="actions">
+            <button id="compare" class="primary" type="button">
+              Compare tokenizers
+            </button>
+            <div class="examples" aria-label="Example inputs">
+              <button type="button" data-example="bangla">Bangla</button>
+              <button type="button" data-example="banglish">Banglish</button>
+              <button type="button" data-example="mixed">Mixed</button>
+              <button type="button" data-example="long">Paragraph</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="results-heading">
+          <div class="card-head">
+            <h2 id="results-heading">Results</h2>
+            <span id="summary" class="summary">Run a comparison to see results.</span>
+          </div>
+
+          <div class="table-wrap">
+            <table id="results-table">
+              <caption class="sr-only">
+                Token counts, sequence length and round-trip losslessness for
+                each tokenizer.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Tokenizer</th>
+                  <th scope="col" class="num">Vocab</th>
+                  <th scope="col" class="num">Tokens</th>
+                  <th scope="col" class="num">Tokens/word</th>
+                  <th scope="col" class="num">Bytes/token</th>
+                  <th scope="col">Lossless</th>
+                  <th scope="col" class="num">Encode (ms)</th>
+                </tr>
+              </thead>
+              <tbody id="results-body">
+                <tr class="placeholder">
+                  <td colspan="7">
+                    The first run downloads about 35 MB of tokenizer files into
+                    your browser cache.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="errors" class="errors" hidden></p>
+        </section>
+
+        <section class="card" aria-labelledby="pieces-heading">
+          <div class="card-head">
+            <h2 id="pieces-heading">Token pieces</h2>
+            <span class="summary">The shortest tokenizer for this input</span>
+          </div>
+          <p id="pieces-label" class="pieces-label">No comparison yet.</p>
+          <pre id="pieces" class="pieces" tabindex="0"></pre>
+        </section>
+
+        <section class="notes" aria-labelledby="notes-heading">
+          <h2 id="notes-heading">How to read this</h2>
+          <ul>
+            <li>
+              <strong>Tokens/word</strong> divides every emitted ID, without
+              special tokens, by the number of whitespace-separated words.
+            </li>
+            <li>
+              <strong>Lossless</strong> means
+              <code>decode(encode(text)) === text</code> after NFC and
+              whitespace normalization. A dash means the round trip changed the
+              text.
+            </li>
+            <li>
+              <strong>Encode</strong> is the median of three runs in this
+              browser tab, so absolute numbers depend on your device. Loading
+              time is excluded.
+            </li>
+            <li>
+              The banglatok models are trained on the
+              <a href="https://huggingface.co/datasets/iamaber/banglatok-training-corpus">banglatok corpus</a>;
+              the other tokenizers never saw that training split.
+            </li>
+          </ul>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          Tokenizer files are served from this Space and loaded with
+          <a href="https://github.com/huggingface/transformers.js">transformers.js</a>.
+          tiktoken encodings use
+          <a href="https://github.com/niieani/gpt-tokenizer">gpt-tokenizer</a>.
+          Nothing you paste leaves your browser.
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
