@@ -89,6 +89,17 @@ const piecesElement = document.querySelector("#pieces");
 const encoder = new TextEncoder();
 const tokenizerCache = new Map();
 const rows = new Map();
+const exampleButtons = [...document.querySelectorAll("[data-example]")];
+
+let runId = 0;
+
+function setBusy(busy) {
+  compareButton.disabled = busy;
+  exampleButtons.forEach((button) => {
+    button.disabled = busy;
+  });
+  statusElement.dataset.busy = busy ? "true" : "false";
+}
 
 function normalizeText(value) {
   return value.normalize("NFC").replace(/\s+/g, " ").trim();
@@ -236,16 +247,23 @@ async function runComparison() {
     return;
   }
 
+  if (statusElement.dataset.busy === "true") {
+    return;
+  }
+
+  const token = (runId += 1);
   rows.clear();
   render();
-  compareButton.disabled = true;
-  statusElement.dataset.busy = "true";
+  setBusy(true);
   statusElement.textContent = `Loading tokenizers… 0/${MODELS.length}`;
 
   let done = 0;
   await Promise.all(
     MODELS.map(async (model) => {
       const row = await measure(model, text);
+      if (token !== runId) {
+        return;
+      }
       rows.set(model.key, row);
       done += 1;
       statusElement.textContent = `Measuring tokenizers… ${done}/${MODELS.length}`;
@@ -253,9 +271,12 @@ async function runComparison() {
     }),
   );
 
-  statusElement.dataset.busy = "false";
+  if (token !== runId) {
+    return;
+  }
+
   statusElement.textContent = "Done";
-  compareButton.disabled = false;
+  setBusy(false);
   render();
 }
 
