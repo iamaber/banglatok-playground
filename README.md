@@ -47,8 +47,9 @@ models, the standard multilingual models, and OpenAI's tiktoken encodings.
 - **Bytes/token** — UTF-8 bytes divided by IDs; higher is more compact.
 - **Lossless** — whether `decode(encode(text))` returns the same text after NFC
   and whitespace normalization. A dash means the round trip changed the text.
-- **Encode (ms)** — the median of three runs in your browser tab. Loading time
-  is excluded, and absolute numbers depend on your device.
+- **Encode (ms)** — the median of three runs, timed one tokenizer at a time
+  after every tokenizer has loaded and been warmed up once. Absolute numbers
+  depend on your device.
 
 Every tokenizer sees the same NFC/whitespace-normalized input. The banglatok
 models were trained on the

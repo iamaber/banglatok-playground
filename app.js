@@ -135,22 +135,41 @@ function getHfTokenizer(key) {
   return tokenizerCache.get(key);
 }
 
-async function measure(model, text) {
+async function loadModel(model) {
+  if (model.kind !== "hf") {
+    return {};
+  }
+  return { tokenizer: await getHfTokenizer(model.key) };
+}
+
+function warmUp(model, prepared, text) {
+  if (model.kind === "hf") {
+    prepared.tokenizer.encode(text, { add_special_tokens: false });
+  } else {
+    model.encode(text);
+  }
+}
+
+function measure(model, prepared, text) {
   const words = text.split(" ").filter(Boolean).length;
   const bytes = encoder.encode(text).length;
   const row = { ...model, error: null, pieces: [] };
+
+  if (prepared.error) {
+    row.error = prepared.error;
+    return row;
+  }
 
   try {
     const times = [];
     let ids = [];
 
     if (model.kind === "hf") {
-      const tokenizer = await getHfTokenizer(model.key);
+      const { tokenizer } = prepared;
       for (let run = 0; run < 3; run += 1) {
         const started = performance.now();
-        const encoded = tokenizer.encode(text, { add_special_tokens: false });
+        ids = Array.from(tokenizer.encode(text, { add_special_tokens: false }), Number);
         times.push(performance.now() - started);
-        ids = Array.from(encoded, Number);
       }
       row.lossless =
         tokenizer.decode(ids, { skip_special_tokens: true }) === text;
@@ -257,26 +276,49 @@ async function runComparison() {
   setBusy(true);
   statusElement.textContent = `Loading tokenizers… 0/${MODELS.length}`;
 
-  let done = 0;
-  await Promise.all(
-    MODELS.map(async (model) => {
-      const row = await measure(model, text);
+  try {
+    const prepared = new Map();
+    // Load one tokenizer at a time, then warm each up once, so no timing run
+    // overlaps another tokenizer's download or first-call compilation.
+    for (const [index, model] of MODELS.entries()) {
       if (token !== runId) {
         return;
       }
-      rows.set(model.key, row);
-      done += 1;
-      statusElement.textContent = `Measuring tokenizers… ${done}/${MODELS.length}`;
-      render();
-    }),
-  );
 
-  if (token !== runId) {
-    return;
+      let ready = {};
+      try {
+        ready = await loadModel(model);
+        warmUp(model, ready, text);
+      } catch (error) {
+        ready = { error: (error && error.message) || String(error) };
+      }
+      prepared.set(model.key, ready);
+      statusElement.textContent = `Loading tokenizers… ${index + 1}/${MODELS.length}`;
+    }
+
+    if (token !== runId) {
+      return;
+    }
+
+    statusElement.textContent = "Measuring tokenizers…";
+    for (const model of MODELS) {
+      if (token !== runId) {
+        return;
+      }
+      rows.set(model.key, measure(model, prepared.get(model.key), text));
+    }
+
+    if (token !== runId) {
+      return;
+    }
+
+    statusElement.textContent = "Done";
+  } finally {
+    if (token === runId) {
+      setBusy(false);
+    }
   }
 
-  statusElement.textContent = "Done";
-  setBusy(false);
   render();
 }
 
