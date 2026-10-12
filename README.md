@@ -32,7 +32,7 @@ models, the standard multilingual models, and OpenAI's tiktoken encodings.
 | banglatok `bn-bpe-28k` | 27,760 |
 | BanglaBERT (csebuetnlp) | 32,000 |
 | Bangla-BERT (sagorsarker) | 101,975 |
-| MuRIL (Google) | 197,258 |
+| MuRIL (Google) | 197,285 |
 | mBERT cased | 119,547 |
 | XLM-R / mE5 / BGE-M3 | 250,002 |
 | Qwen3 0.6B | 151,669 |

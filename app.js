@@ -35,7 +35,7 @@ const MODELS = [
     vocab: 101975,
     kind: "hf",
   },
-  { key: "muril-base-cased", label: "MuRIL (Google)", vocab: 197258, kind: "hf" },
+  { key: "muril-base-cased", label: "MuRIL (Google)", vocab: 197285, kind: "hf" },
   {
     key: "bert-base-multilingual-cased",
     label: "mBERT cased",
