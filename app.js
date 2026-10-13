@@ -1,10 +1,12 @@
 import { AutoTokenizer, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2";
 import {
   decode as decodeO200k,
+  decodeGenerator as decodeO200kPieces,
   encode as encodeO200k,
 } from "https://esm.sh/gpt-tokenizer@4.1.2/model/gpt-4o";
 import {
   decode as decodeCl100k,
+  decodeGenerator as decodeCl100kPieces,
   encode as encodeCl100k,
 } from "https://esm.sh/gpt-tokenizer@4.1.2/model/gpt-4";
 
@@ -56,6 +58,7 @@ const MODELS = [
     kind: "tiktoken",
     encode: encodeO200k,
     decode: decodeO200k,
+    decodePieces: decodeO200kPieces,
   },
   {
     key: "cl100k_base",
@@ -64,6 +67,7 @@ const MODELS = [
     kind: "tiktoken",
     encode: encodeCl100k,
     decode: decodeCl100k,
+    decodePieces: decodeCl100kPieces,
   },
 ];
 
@@ -90,6 +94,7 @@ const encoder = new TextEncoder();
 const tokenizerCache = new Map();
 const rows = new Map();
 const exampleButtons = [...document.querySelectorAll("[data-example]")];
+const PIECES_LIMIT = 240;
 
 let runId = 0;
 
@@ -173,9 +178,6 @@ function measure(model, prepared, text) {
       }
       row.lossless =
         tokenizer.decode(ids, { skip_special_tokens: true }) === text;
-      row.pieces = ids.map((id) =>
-        tokenizer.decode([id], { skip_special_tokens: true }),
-      );
     } else {
       for (let run = 0; run < 3; run += 1) {
         const started = performance.now();
@@ -183,7 +185,6 @@ function measure(model, prepared, text) {
         times.push(performance.now() - started);
       }
       row.lossless = model.decode(ids) === text;
-      row.pieces = ids.map((id) => model.decode([id]));
     }
 
     row.tokens = ids.length;
@@ -195,6 +196,20 @@ function measure(model, prepared, text) {
   }
 
   return row;
+}
+
+function collectPieces(row, prepared, text) {
+  try {
+    if (row.kind === "hf") {
+      return prepared.tokenizer
+        .tokenize(text, { add_special_tokens: false })
+        .slice(0, PIECES_LIMIT);
+    }
+    const ids = row.encode(text).slice(0, PIECES_LIMIT + 8);
+    return [...row.decodePieces(ids)].slice(0, PIECES_LIMIT);
+  } catch (error) {
+    return [];
+  }
 }
 
 function tag(row) {
@@ -240,11 +255,16 @@ function render() {
     : "No tokenizer results.";
 
   if (bestRow) {
-    piecesLabel.textContent = `${bestRow.label} · ${bestRow.tokens} tokens`;
-    piecesElement.textContent = bestRow.pieces
-      .slice(0, 240)
-      .map((piece) => (piece === "" ? "∅" : piece))
-      .join(" · ");
+    const shown = bestRow.pieces.length;
+    piecesLabel.textContent =
+      `${bestRow.label} · ${bestRow.tokens} tokens` +
+      (shown && shown < bestRow.tokens ? ` · first ${shown} pieces` : "");
+    piecesElement.textContent = shown
+      ? bestRow.pieces.map((piece) => (piece === "" ? "∅" : piece)).join(" · ")
+      : "Token pieces are unavailable for this tokenizer.";
+  } else {
+    piecesLabel.textContent = "No comparison yet.";
+    piecesElement.textContent = "";
   }
 
   const failures = list.filter((row) => row.error);
@@ -310,6 +330,14 @@ async function runComparison() {
 
     if (token !== runId) {
       return;
+    }
+
+    // Only the row the page displays needs token pieces.
+    const best = [...rows.values()]
+      .filter((row) => !row.error)
+      .sort((a, b) => a.tokens - b.tokens)[0];
+    if (best) {
+      best.pieces = collectPieces(best, prepared.get(best.key), text);
     }
 
     statusElement.textContent = "Done";

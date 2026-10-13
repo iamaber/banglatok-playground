@@ -125,6 +125,13 @@ meetingটা ১০টায়, don't be late 🙂</textarea>
               Absolute numbers depend on your device.
             </li>
             <li>
+              <strong>Token pieces</strong> are the strings the shortest
+              tokenizer emits, not each ID decoded on its own:
+              <code>▁</code> marks a leading space in SentencePiece and
+              <code>##</code> marks a WordPiece continuation. Only the first
+              240 pieces are shown.
+            </li>
+            <li>
               The banglatok models are trained on the
               <a href="https://huggingface.co/datasets/iamaber/banglatok-training-corpus">banglatok corpus</a>;
               the other tokenizers never saw that training split.
