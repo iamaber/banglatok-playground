@@ -75,7 +75,8 @@ browser implements correctly and which produces the same pieces as the Python
 `tokenizers` library. Without the patch, every multi-word input is overcounted.
 
 The first comparison downloads about 35 MB of tokenizer files. Later visits use
-the browser cache.
+the browser cache. Input is capped at 20,000 normalized characters so a single
+comparison keeps the page responsive.
 
 ## Local development
 

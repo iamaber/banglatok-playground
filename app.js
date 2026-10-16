@@ -95,6 +95,7 @@ const tokenizerCache = new Map();
 const rows = new Map();
 const exampleButtons = [...document.querySelectorAll("[data-example]")];
 const PIECES_LIMIT = 240;
+const MAX_INPUT_CHARS = 20000;
 
 let runId = 0;
 
@@ -280,13 +281,20 @@ function render() {
 }
 
 async function runComparison() {
+  if (statusElement.dataset.busy === "true") {
+    return;
+  }
+
   const text = normalizeText(textarea.value);
   if (!text) {
     statusElement.textContent = "Enter some text first.";
     return;
   }
 
-  if (statusElement.dataset.busy === "true") {
+  if (text.length > MAX_INPUT_CHARS) {
+    statusElement.textContent =
+      `Input is ${text.length.toLocaleString()} characters; the limit is ` +
+      `${MAX_INPUT_CHARS.toLocaleString()}. Shorten it and compare again.`;
     return;
   }
 
