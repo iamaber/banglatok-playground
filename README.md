@@ -64,8 +64,10 @@ The Space is static. Tokenizer files are served from `models/` and loaded with
 encodings run through [gpt-tokenizer](https://github.com/niieani/gpt-tokenizer).
 
 Three upstream models publish only a `vocab.txt`, so `scripts/export_tokenizers.py`
-converts them to fast tokenizers once. The mBERT, XLM-R and Qwen3 `tokenizer.json`
-files are the exact files published on the Hub.
+converts only those three to fast tokenizers, pinned to the revisions in
+[models/PROVENANCE.md](models/PROVENANCE.md). The mBERT, XLM-R and Qwen3
+`tokenizer.json` files are the exact files published on the Hub and are copied
+verbatim, not re-saved.
 
 The banglatok files are the published `tokenizer.json` with one patch: the
 tokenizers WASM build used by transformers.js does not honour the
@@ -84,20 +86,51 @@ comparison keeps the page responsive.
 python -m http.server 8000
 ```
 
-Open <http://localhost:8000>. To regenerate the bundled tokenizer files:
+Open <http://localhost:8000>.
+
+To regenerate the bundled tokenizer files, follow the steps in order. Every
+download is pinned to the revision recorded in
+[models/PROVENANCE.md](models/PROVENANCE.md).
 
 ```bash
+# 1. Convert the three models that publish only a vocab.txt.
 uv run --with transformers==4.57.6 --with sentencepiece --with protobuf \
   python scripts/export_tokenizers.py
-hf download iamaber/banglatok-bn-bpe-58k tokenizer.json tokenizer_config.json \
+
+# 2. Copy the models that already publish tokenizer.json, verbatim.
+hf download google-bert/bert-base-multilingual-cased \
+  tokenizer.json tokenizer_config.json special_tokens_map.json vocab.txt config.json \
+  --revision 3f076fdb1ab68d5b2880cb87a0886f315b8146f8 \
+  --local-dir models/bert-base-multilingual-cased
+hf download FacebookAI/xlm-roberta-base \
+  tokenizer.json tokenizer_config.json special_tokens_map.json \
+  sentencepiece.bpe.model config.json \
+  --revision e73636d4f797dec63c3081bb6ed5c7b0bb3f2089 \
+  --local-dir models/xlm-roberta-base
+hf download Qwen/Qwen3-0.6B \
+  tokenizer.json tokenizer_config.json special_tokens_map.json added_tokens.json \
+  merges.txt vocab.json chat_template.jinja config.json \
+  --revision c1899de289a04d12100db370d81485cdf75e47ca \
+  --local-dir models/qwen3-0.6b
+
+# 3. Download the published banglatok files, then apply the pre-tokenizer patch.
+hf download iamaber/banglatok-bn-bpe-58k \
+  tokenizer.json tokenizer_config.json special_tokens_map.json \
+  --revision 7e59b254d50ad60adec3747206d251abf0310558 \
   --local-dir models/banglatok-bn-bpe-58k
-hf download iamaber/banglatok-bn-bpe-28k tokenizer.json tokenizer_config.json \
+hf download iamaber/banglatok-bn-bpe-28k \
+  tokenizer.json tokenizer_config.json special_tokens_map.json \
+  --revision 4450dd6184bfdce8078ea428179ab507ab70f117 \
   --local-dir models/banglatok-bn-bpe-28k
 uv run --with tokenizers python scripts/patch_tokenizers.py
+
+# 4. Verify the bundled files match the recorded hashes.
+shasum -a 256 -c models/CHECKSUMS.sha256
 ```
 
 Use the original published `tokenizer.json` for the banglatok models: their
 vocabulary contains intentional index gaps, and re-saving it can corrupt it.
+That is why `scripts/export_tokenizers.py` never touches those directories.
 Then apply the pre-tokenizer patch above.
 
 ## Licenses

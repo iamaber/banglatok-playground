@@ -5,6 +5,16 @@ The browser uses transformers.js, which can only load fast tokenizers
 ``vocab.txt``, so this script converts them once and writes the files the
 Space serves under ``models/``.
 
+The other models are not handled here:
+
+* ``bert-base-multilingual-cased``, ``xlm-roberta-base`` and ``qwen3-0.6b``
+  publish a ``tokenizer.json`` already; download the Hub files verbatim.
+* The banglatok tokenizers also publish a ``tokenizer.json``; download it and
+  run ``scripts/patch_tokenizers.py`` instead. Re-saving it here would corrupt
+  the intentional index gaps in its vocabulary.
+
+Every model is pinned to the revision recorded in ``models/PROVENANCE.md``.
+
 Run from the repository root:
 
     uv run --with transformers==4.57.6 --with sentencepiece --with protobuf \\
@@ -16,26 +26,29 @@ from pathlib import Path
 from transformers import AutoTokenizer
 
 MODELS = {
-    "banglatok-bn-bpe-58k": "iamaber/banglatok-bn-bpe-58k",
-    "banglatok-bn-bpe-28k": "iamaber/banglatok-bn-bpe-28k",
-    "banglabert": "csebuetnlp/banglabert",
-    "bangla-bert-base": "sagorsarker/bangla-bert-base",
-    "muril-base-cased": "google/muril-base-cased",
-    "bert-base-multilingual-cased": "google-bert/bert-base-multilingual-cased",
-    "xlm-roberta-base": "FacebookAI/xlm-roberta-base",
-    "qwen3-0.6b": "Qwen/Qwen3-0.6B",
+    "banglabert": ("csebuetnlp/banglabert", "9ce791f330578f50da6bc52b54205166fb5d1c8c"),
+    "bangla-bert-base": (
+        "sagorsarker/bangla-bert-base",
+        "875aa80a42ec196c16bd931ae5d85ad949f58b16",
+    ),
+    "muril-base-cased": (
+        "google/muril-base-cased",
+        "afd9f36c7923d54e97903922ff1b260d091d202f",
+    ),
 }
 
 
 def main():
     output = Path(__file__).resolve().parent.parent / "models"
-    for name, repo_id in MODELS.items():
-        tokenizer = AutoTokenizer.from_pretrained(repo_id, use_fast=True)
+    for name, (repo_id, revision) in MODELS.items():
+        tokenizer = AutoTokenizer.from_pretrained(
+            repo_id, revision=revision, use_fast=True
+        )
         target = output / name
         target.mkdir(parents=True, exist_ok=True)
         tokenizer.save_pretrained(target)
         files = sorted(path.name for path in target.iterdir())
-        print(f"{repo_id} -> models/{name}: {type(tokenizer).__name__}")
+        print(f"{repo_id}@{revision[:12]} -> models/{name}: {type(tokenizer).__name__}")
         print(f"  {', '.join(files)}")
 
 
