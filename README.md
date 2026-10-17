@@ -83,10 +83,11 @@ comparison keeps the page responsive.
 ## Local development
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open <http://localhost:8000>.
+Open <http://127.0.0.1:8000>. Binding to loopback keeps the working tree,
+including `.git/`, off your network.
 
 To regenerate the bundled tokenizer files, follow the steps in order. Every
 download is pinned to the revision recorded in
