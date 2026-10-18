@@ -1,0 +1,7 @@
+# Pinned versions for the maintenance scripts.
+# Install with: uv pip install -r scripts/requirements.txt
+# or run a script with: uv run --with-requirements scripts/requirements.txt python scripts/export_tokenizers.py
+transformers==4.57.6
+tokenizers==0.23.0
+sentencepiece==0.2.3
+protobuf==7.36.2

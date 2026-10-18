@@ -80,6 +80,9 @@ The first comparison downloads about 35 MB of tokenizer files. Later visits use
 the browser cache. Input is capped at 20,000 normalized characters so a single
 comparison keeps the page responsive.
 
+The browser libraries are pinned in `package.json` and loaded from their CDNs;
+the maintenance-script versions are pinned in `scripts/requirements.txt`.
+
 ## Local development
 
 ```bash
@@ -95,8 +98,8 @@ download is pinned to the revision recorded in
 
 ```bash
 # 1. Convert the three models that publish only a vocab.txt.
-uv run --with transformers==4.57.6 --with sentencepiece --with protobuf \
-  python scripts/export_tokenizers.py
+uv run --with transformers==4.57.6 --with sentencepiece==0.2.3 \
+  --with protobuf==7.36.2 python scripts/export_tokenizers.py
 
 # 2. Copy the models that already publish tokenizer.json, verbatim.
 hf download google-bert/bert-base-multilingual-cased \
@@ -123,7 +126,7 @@ hf download iamaber/banglatok-bn-bpe-28k \
   tokenizer.json tokenizer_config.json special_tokens_map.json \
   --revision 4450dd6184bfdce8078ea428179ab507ab70f117 \
   --local-dir models/banglatok-bn-bpe-28k
-uv run --with tokenizers python scripts/patch_tokenizers.py
+uv run --with tokenizers==0.23.0 python scripts/patch_tokenizers.py
 
 # 4. Verify the bundled files match the recorded hashes.
 shasum -a 256 -c models/CHECKSUMS.sha256
