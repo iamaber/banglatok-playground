@@ -1,0 +1,11 @@
+Tokenizer files in this directory are redistributed from
+https://huggingface.co/iamaber/banglatok-bn-bpe-28k
+
+License: CC BY-SA 4.0
+SPDX identifier: CC-BY-SA-4.0
+License text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Bundled from the Hub with the pre-tokenizer patch described in ../../README.md.
+
+See ../../NOTICE.md for the bundle as a whole and ../../LICENSE for the
+application code, which is MIT.

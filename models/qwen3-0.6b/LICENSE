@@ -1,0 +1,11 @@
+Tokenizer files in this directory are redistributed from
+https://huggingface.co/Qwen/Qwen3-0.6B
+
+License: Apache-2.0
+SPDX identifier: Apache-2.0
+License text: https://www.apache.org/licenses/LICENSE-2.0
+
+Copied verbatim from the Hub.
+
+See ../../NOTICE.md for the bundle as a whole and ../../LICENSE for the
+application code, which is MIT.

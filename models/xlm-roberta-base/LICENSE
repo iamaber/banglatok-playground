@@ -1,0 +1,11 @@
+Tokenizer files in this directory are redistributed from
+https://huggingface.co/FacebookAI/xlm-roberta-base
+
+License: MIT
+SPDX identifier: MIT
+License text: https://opensource.org/license/mit
+
+Copied verbatim from the Hub.
+
+See ../../NOTICE.md for the bundle as a whole and ../../LICENSE for the
+application code, which is MIT.

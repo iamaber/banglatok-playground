@@ -6,7 +6,7 @@ colorTo: purple
 sdk: static
 app_file: index.html
 pinned: false
-license: mit
+license: other
 short_description: Compare Bangla and Banglish token counts in your browser
 tags:
   - tokenizer
@@ -135,13 +135,14 @@ shasum -a 256 -c models/CHECKSUMS.sha256
 Use the original published `tokenizer.json` for the banglatok models: their
 vocabulary contains intentional index gaps, and re-saving it can corrupt it.
 That is why `scripts/export_tokenizers.py` never touches those directories.
-Then apply the pre-tokenizer patch above.
 
 ## Licenses
 
 The application code is MIT; see [LICENSE](LICENSE).
 
-The bundled tokenizer files keep their upstream licenses. The banglatok models
-and training corpus are CC BY-SA 4.0. BanglaBERT is CC BY-NC-SA 4.0. See
+The Space is marked `other` because the bundle is mixed. The bundled tokenizer
+files keep their upstream licenses, recorded per directory in
+`models/*/LICENSE`: the banglatok models and training corpus are CC BY-SA 4.0,
+BanglaBERT is CC BY-NC-SA 4.0, and the rest are MIT or Apache-2.0. See
 [NOTICE.md](NOTICE.md) for the full list. The MIT license covers this Space's
 own code, not the bundled tokenizer data.

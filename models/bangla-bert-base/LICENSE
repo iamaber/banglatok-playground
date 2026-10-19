@@ -1,0 +1,11 @@
+Tokenizer files in this directory are redistributed from
+https://huggingface.co/sagorsarker/bangla-bert-base
+
+License: MIT
+SPDX identifier: MIT
+License text: https://opensource.org/license/mit
+
+Exported to a fast tokenizer from the published vocab.txt.
+
+See ../../NOTICE.md for the bundle as a whole and ../../LICENSE for the
+application code, which is MIT.

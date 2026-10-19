@@ -2,7 +2,8 @@
 
 This Space bundles tokenizer files so the comparison runs without any network
 calls after the first load. The application code is MIT. The tokenizer files
-remain under their upstream licenses:
+remain under their upstream licenses, and each directory under `models/` also
+carries a `LICENSE` notice naming its SPDX identifier:
 
 | Bundled directory | Upstream repository | License |
 | --- | --- | --- |
