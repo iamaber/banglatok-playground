@@ -81,7 +81,9 @@ the browser cache. Input is capped at 20,000 normalized characters so a single
 comparison keeps the page responsive.
 
 The browser libraries are pinned in `package.json` and loaded from their CDNs;
-the maintenance-script versions are pinned in `scripts/requirements.txt`.
+the maintenance-script versions are pinned in `scripts/requirements.txt`. A
+Content-Security-Policy restricts scripts to this origin plus the two pinned
+CDNs, and blocks outbound `fetch`/XHR, so pasted text cannot be uploaded.
 
 ## Local development
 
