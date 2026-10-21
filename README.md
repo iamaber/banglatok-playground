@@ -81,7 +81,8 @@ the browser cache. Input is capped at 20,000 normalized characters so a single
 comparison keeps the page responsive.
 
 The browser libraries are pinned in `package.json` and loaded from their CDNs;
-the maintenance-script versions are pinned in `scripts/requirements.txt`. A
+the maintenance-script versions and Python 3.12 are pinned in
+`scripts/requirements.txt` and `.python-version`. A
 Content-Security-Policy restricts scripts to this origin plus the two pinned
 CDNs, and blocks outbound `fetch`/XHR, so pasted text cannot be uploaded.
 
@@ -129,7 +130,7 @@ hf download iamaber/banglatok-bn-bpe-28k \
   tokenizer.json tokenizer_config.json special_tokens_map.json \
   --revision 4450dd6184bfdce8078ea428179ab507ab70f117 \
   --local-dir models/banglatok-bn-bpe-28k
-uv run --with tokenizers==0.23.0 python scripts/patch_tokenizers.py
+uv run --with tokenizers==0.22.2 python scripts/patch_tokenizers.py
 
 # 4. Verify the bundled files match the recorded hashes.
 shasum -a 256 -c models/CHECKSUMS.sha256

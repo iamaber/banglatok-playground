@@ -1,8 +1,11 @@
 # Pinned versions for the maintenance scripts.
 # Install with: uv pip install -r scripts/requirements.txt
 # or run a script with: uv run --with-requirements scripts/requirements.txt python scripts/export_tokenizers.py
+# Python 3.12 (see ../.python-version). tokenizers is the newest stable release
+# accepted by transformers==4.57.6, whose ceiling is 0.23.0 (0.23.0 itself was
+# never released; 0.22.2 ships cp39-abi3 wheels).
 transformers==4.57.6
-tokenizers==0.23.0
+tokenizers==0.22.2
 sentencepiece==0.2.3
 protobuf==7.36.2
 # Provides the `hf` CLI used to download the pinned Hub files.
