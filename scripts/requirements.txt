@@ -5,3 +5,5 @@ transformers==4.57.6
 tokenizers==0.23.0
 sentencepiece==0.2.3
 protobuf==7.36.2
+# Provides the `hf` CLI used to download the pinned Hub files.
+huggingface_hub==2.4.0

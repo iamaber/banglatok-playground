@@ -96,7 +96,8 @@ including `.git/`, off your network.
 
 To regenerate the bundled tokenizer files, follow the steps in order. Every
 download is pinned to the revision recorded in
-[models/PROVENANCE.md](models/PROVENANCE.md).
+[models/PROVENANCE.md](models/PROVENANCE.md), and the `hf` CLI comes from the
+pinned `huggingface_hub` in `scripts/requirements.txt`.
 
 ```bash
 # 1. Convert the three models that publish only a vocab.txt.
