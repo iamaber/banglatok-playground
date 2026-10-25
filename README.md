@@ -102,8 +102,8 @@ pinned `huggingface_hub` in `scripts/requirements.txt`.
 
 ```bash
 # 1. Convert the three models that publish only a vocab.txt.
-uv run --with transformers==4.57.6 --with sentencepiece==0.2.3 \
-  --with protobuf==7.36.2 python scripts/export_tokenizers.py
+uv run --with-requirements scripts/requirements.txt \
+  python scripts/export_tokenizers.py
 
 # 2. Copy the models that already publish tokenizer.json, verbatim.
 hf download google-bert/bert-base-multilingual-cased \
@@ -130,7 +130,8 @@ hf download iamaber/banglatok-bn-bpe-28k \
   tokenizer.json tokenizer_config.json special_tokens_map.json \
   --revision 4450dd6184bfdce8078ea428179ab507ab70f117 \
   --local-dir models/banglatok-bn-bpe-28k
-uv run --with tokenizers==0.22.2 python scripts/patch_tokenizers.py
+# The patch script is standard-library only, so it needs no pinned packages.
+uv run python scripts/patch_tokenizers.py
 
 # 4. Verify the bundled files match the recorded hashes.
 shasum -a 256 -c models/CHECKSUMS.sha256

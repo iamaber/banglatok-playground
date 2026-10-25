@@ -8,7 +8,7 @@ pieces in both the Python ``tokenizers`` library and the browser.
 
 Run after downloading the published ``tokenizer.json`` files:
 
-    uv run --with tokenizers python scripts/patch_tokenizers.py
+    uv run python scripts/patch_tokenizers.py
 """
 
 import json

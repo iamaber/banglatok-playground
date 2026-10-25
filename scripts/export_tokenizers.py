@@ -15,9 +15,10 @@ The other models are not handled here:
 
 Every model is pinned to the revision recorded in ``models/PROVENANCE.md``.
 
-Run from the repository root:
+Run from the repository root, with the versions pinned in
+``scripts/requirements.txt``:
 
-    uv run --with transformers==4.57.6 --with sentencepiece --with protobuf \\
+    uv run --with-requirements scripts/requirements.txt \\
         python scripts/export_tokenizers.py
 """
 
