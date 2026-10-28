@@ -305,18 +305,34 @@ async function runComparison() {
 
   try {
     const prepared = new Map();
-    // Load one tokenizer at a time, then warm each up once, so no timing run
-    // overlaps another tokenizer's download or first-call compilation.
+    // Download and parse every tokenizer in parallel, then warm each up once,
+    // one at a time. Timing starts only after all of that has finished, so no
+    // timing run overlaps a download or a first-call compilation.
+    let loaded = 0;
+    const loads = await Promise.all(
+      MODELS.map(async (model) => {
+        let ready;
+        try {
+          ready = await loadModel(model);
+        } catch (error) {
+          ready = { error: (error && error.message) || String(error) };
+        }
+        loaded += 1;
+        statusElement.textContent = `Loading tokenizers… ${loaded}/${MODELS.length}`;
+        return ready;
+      }),
+    );
+
     for (const [index, model] of MODELS.entries()) {
-      let ready = {};
-      try {
-        ready = await loadModel(model);
-        warmUp(model, ready, text);
-      } catch (error) {
-        ready = { error: (error && error.message) || String(error) };
+      let ready = loads[index];
+      if (!ready.error) {
+        try {
+          warmUp(model, ready, text);
+        } catch (error) {
+          ready = { error: (error && error.message) || String(error) };
+        }
       }
       prepared.set(model.key, ready);
-      statusElement.textContent = `Loading tokenizers… ${index + 1}/${MODELS.length}`;
     }
 
     statusElement.textContent = "Measuring tokenizers…";
