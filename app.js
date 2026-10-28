@@ -97,8 +97,6 @@ const exampleButtons = [...document.querySelectorAll("[data-example]")];
 const PIECES_LIMIT = 240;
 const MAX_INPUT_CHARS = 20000;
 
-let runId = 0;
-
 function setBusy(busy) {
   compareButton.disabled = busy;
   exampleButtons.forEach((button) => {
@@ -298,7 +296,8 @@ async function runComparison() {
     return;
   }
 
-  const token = (runId += 1);
+  // The busy flag is the only re-entry guard: it is set synchronously here,
+  // before the first await, and every trigger goes through the check above.
   rows.clear();
   render();
   setBusy(true);
@@ -309,10 +308,6 @@ async function runComparison() {
     // Load one tokenizer at a time, then warm each up once, so no timing run
     // overlaps another tokenizer's download or first-call compilation.
     for (const [index, model] of MODELS.entries()) {
-      if (token !== runId) {
-        return;
-      }
-
       let ready = {};
       try {
         ready = await loadModel(model);
@@ -324,20 +319,9 @@ async function runComparison() {
       statusElement.textContent = `Loading tokenizers… ${index + 1}/${MODELS.length}`;
     }
 
-    if (token !== runId) {
-      return;
-    }
-
     statusElement.textContent = "Measuring tokenizers…";
     for (const model of MODELS) {
-      if (token !== runId) {
-        return;
-      }
       rows.set(model.key, measure(model, prepared.get(model.key), text));
-    }
-
-    if (token !== runId) {
-      return;
     }
 
     // Only the row the page displays needs token pieces.
@@ -350,9 +334,7 @@ async function runComparison() {
 
     statusElement.textContent = "Done";
   } finally {
-    if (token === runId) {
-      setBusy(false);
-    }
+    setBusy(false);
   }
 
   render();
