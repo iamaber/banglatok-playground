@@ -83,8 +83,12 @@ comparison keeps the page responsive.
 The browser libraries are pinned in `package.json` and loaded from their CDNs;
 the maintenance-script versions and Python 3.12 are pinned in
 `scripts/requirements.txt` and `.python-version`. A
-Content-Security-Policy restricts scripts to this origin plus the two pinned
-CDNs, and blocks outbound `fetch`/XHR, so pasted text cannot be uploaded.
+Content-Security-Policy limits script sources and `fetch`/XHR destinations to
+this origin plus the two pinned CDN origins (`cdn.jsdelivr.net`, `esm.sh`),
+allows WebAssembly compilation, and disables plugins, frames, form submission
+and `<base>`. It is defence in depth, not a guarantee: the two CDN bundles
+still run with full page privileges, and the policy does not restrict
+navigation. The page's own code never sends pasted text anywhere.
 
 ## Local development
 
