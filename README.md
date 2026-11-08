@@ -80,7 +80,9 @@ The first comparison downloads about 35 MB of tokenizer files. Later visits use
 the browser cache. Input is capped at 20,000 normalized characters so a single
 comparison keeps the page responsive.
 
-The browser libraries are pinned in `package.json` and loaded from their CDNs;
+The browser libraries are loaded from their CDNs at the versions written in the
+`app.js` import URLs; `package.json` records the same versions under `cdnPins`
+(nothing is installed with npm, and there is no build step);
 the maintenance-script versions and Python 3.12 are pinned in
 `scripts/requirements.txt` and `.python-version`. A
 Content-Security-Policy limits script sources and `fetch`/XHR destinations to
