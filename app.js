@@ -128,6 +128,10 @@ function escapeHtml(value) {
   );
 }
 
+function getErrorMessage(error) {
+  return (error && error.message) || String(error);
+}
+
 function getHfTokenizer(key) {
   if (!tokenizerCache.has(key)) {
     const promise = AutoTokenizer.from_pretrained(key).catch((error) => {
@@ -191,7 +195,7 @@ function measure(model, prepared, text) {
     row.bytesPerToken = ids.length ? bytes / ids.length : 0;
     row.ms = median(times);
   } catch (error) {
-    row.error = (error && error.message) || String(error);
+    row.error = getErrorMessage(error);
   }
 
   return row;
@@ -311,15 +315,14 @@ async function runComparison() {
     let loaded = 0;
     const loads = await Promise.all(
       MODELS.map(async (model) => {
-        let ready;
         try {
-          ready = await loadModel(model);
+          return await loadModel(model);
         } catch (error) {
-          ready = { error: (error && error.message) || String(error) };
+          return { error: getErrorMessage(error) };
+        } finally {
+          loaded += 1;
+          statusElement.textContent = `Loading tokenizers… ${loaded}/${MODELS.length}`;
         }
-        loaded += 1;
-        statusElement.textContent = `Loading tokenizers… ${loaded}/${MODELS.length}`;
-        return ready;
       }),
     );
 
@@ -329,7 +332,7 @@ async function runComparison() {
         try {
           warmUp(model, ready, text);
         } catch (error) {
-          ready = { error: (error && error.message) || String(error) };
+          ready = { error: getErrorMessage(error) };
         }
       }
       prepared.set(model.key, ready);
