@@ -50,6 +50,8 @@ models, the standard multilingual models, and OpenAI's tiktoken encodings.
 - **Encode (ms)** — the median of three runs, timed one tokenizer at a time
   after every tokenizer has loaded and been warmed up once. Absolute numbers
   depend on your device.
+- **Token pieces** — the strings emitted by the selected tokenizer. The
+  playground generates them on demand and shows up to 240 pieces.
 
 Every tokenizer sees the same NFC/whitespace-normalized input. The banglatok
 models were trained on the

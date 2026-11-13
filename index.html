@@ -103,10 +103,23 @@ meetingটা ১০টায়, don't be late 🙂</textarea>
         <section class="card" aria-labelledby="pieces-heading">
           <div class="card-head">
             <h2 id="pieces-heading">Token pieces</h2>
-            <span class="summary">The shortest tokenizer for this input</span>
+            <span class="summary">Inspect the output from any tokenizer</span>
           </div>
-          <p id="pieces-label" class="pieces-label">No comparison yet.</p>
-          <pre id="pieces" class="pieces" tabindex="0"></pre>
+          <div class="pieces-controls">
+            <label for="pieces-tokenizer">Tokenizer</label>
+            <select id="pieces-tokenizer" class="pieces-select" disabled>
+              <option value="">No comparison yet</option>
+            </select>
+          </div>
+          <p id="pieces-label" class="pieces-label" aria-live="polite">
+            No comparison yet.
+          </p>
+          <pre
+            id="pieces"
+            class="pieces"
+            tabindex="0"
+            aria-labelledby="pieces-label"
+          ></pre>
         </section>
 
         <section class="notes" aria-labelledby="notes-heading">
@@ -129,32 +142,16 @@ meetingটা ১০টায়, don't be late 🙂</textarea>
               Absolute numbers depend on your device.
             </li>
             <li>
-              <strong>Token pieces</strong> are the strings the shortest
-              tokenizer emits, not each ID decoded on its own:
+              <strong>Token pieces</strong> are the strings emitted by the
+              selected tokenizer, not each ID decoded on its own:
               <code>▁</code> marks a leading space in SentencePiece and
               <code>##</code> marks a WordPiece continuation. Only the first
               240 pieces are shown.
-            </li>
-            <li>
-              The banglatok models are trained on the
-              <a href="https://huggingface.co/datasets/iamaber/banglatok-training-corpus">banglatok corpus</a>;
-              the other tokenizers never saw that training split.
             </li>
           </ul>
         </section>
       </main>
 
-      <footer>
-        <p>
-          Tokenizer files are served from this Space and loaded with
-          <a href="https://github.com/huggingface/transformers.js">transformers.js</a>.
-          tiktoken encodings use
-          <a href="https://github.com/niieani/gpt-tokenizer">gpt-tokenizer</a>.
-          Bundled tokenizer licenses are listed in
-          <a href="NOTICE.md">NOTICE.md</a>. Nothing you paste leaves your
-          browser.
-        </p>
-      </footer>
     </div>
 
     <script type="module" src="app.js"></script>

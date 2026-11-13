@@ -89,10 +89,13 @@ const tableBody = document.querySelector("#results-body");
 const errorsElement = document.querySelector("#errors");
 const piecesLabel = document.querySelector("#pieces-label");
 const piecesElement = document.querySelector("#pieces");
+const piecesSelect = document.querySelector("#pieces-tokenizer");
 
 const encoder = new TextEncoder();
 const tokenizerCache = new Map();
 const rows = new Map();
+let activeComparison = null;
+let selectedTokenizerKey = null;
 const exampleButtons = [...document.querySelectorAll("[data-example]")];
 const PIECES_LIMIT = 240;
 const MAX_INPUT_CHARS = 20000;
@@ -161,7 +164,7 @@ function warmUp(model, prepared, text) {
 function measure(model, prepared, text) {
   const words = text.split(" ").filter(Boolean).length;
   const bytes = encoder.encode(text).length;
-  const row = { ...model, error: null, pieces: [] };
+  const row = { ...model, error: null, pieces: null };
 
   if (prepared.error) {
     row.error = prepared.error;
@@ -219,6 +222,31 @@ function tag(row) {
   return row.tag ? `<span class="tag">${escapeHtml(row.tag)}</span>` : "";
 }
 
+function renderPieces() {
+  const row = rows.get(piecesSelect.value);
+  if (!row || row.error || !activeComparison) {
+    piecesLabel.textContent = "No comparison yet.";
+    piecesElement.textContent = "";
+    return;
+  }
+
+  if (row.pieces === null) {
+    row.pieces = collectPieces(
+      row,
+      activeComparison.prepared.get(row.key),
+      activeComparison.text,
+    );
+  }
+
+  const shown = row.pieces.length;
+  piecesLabel.textContent =
+    `${row.label} · ${row.tokens} tokens` +
+    (shown && shown < row.tokens ? ` · first ${shown} pieces` : "");
+  piecesElement.textContent = shown
+    ? row.pieces.map((piece) => (piece === "" ? "∅" : piece)).join(" · ")
+    : "Token pieces are unavailable for this tokenizer.";
+}
+
 function render() {
   const list = [...rows.values()].sort((a, b) => {
     if (a.error && !b.error) return 1;
@@ -257,18 +285,25 @@ function render() {
       `Lossless: ${valid.filter((row) => row.lossless).length}/${valid.length}.`
     : "No tokenizer results.";
 
-  if (bestRow) {
-    const shown = bestRow.pieces.length;
-    piecesLabel.textContent =
-      `${bestRow.label} · ${bestRow.tokens} tokens` +
-      (shown && shown < bestRow.tokens ? ` · first ${shown} pieces` : "");
-    piecesElement.textContent = shown
-      ? bestRow.pieces.map((piece) => (piece === "" ? "∅" : piece)).join(" · ")
-      : "Token pieces are unavailable for this tokenizer.";
-  } else {
-    piecesLabel.textContent = "No comparison yet.";
-    piecesElement.textContent = "";
+  const selectedRow =
+    valid.find((row) => row.key === selectedTokenizerKey) || bestRow;
+  if (selectedRow) {
+    selectedTokenizerKey = selectedRow.key;
   }
+
+  piecesSelect.innerHTML = selectedRow
+    ? valid
+        .map(
+          (row) =>
+            `<option value="${escapeHtml(row.key)}">${escapeHtml(row.label)}</option>`,
+        )
+        .join("")
+    : '<option value="">No comparison yet</option>';
+  piecesSelect.disabled = !selectedRow || !activeComparison;
+  if (selectedRow) {
+    piecesSelect.value = selectedRow.key;
+  }
+  renderPieces();
 
   const failures = list.filter((row) => row.error);
   if (failures.length) {
@@ -302,6 +337,7 @@ async function runComparison() {
 
   // The busy flag is the only re-entry guard: it is set synchronously here,
   // before the first await, and every trigger goes through the check above.
+  activeComparison = null;
   rows.clear();
   render();
   setBusy(true);
@@ -343,13 +379,7 @@ async function runComparison() {
       rows.set(model.key, measure(model, prepared.get(model.key), text));
     }
 
-    // Only the row the page displays needs token pieces.
-    const best = [...rows.values()]
-      .filter((row) => !row.error)
-      .sort((a, b) => a.tokens - b.tokens)[0];
-    if (best) {
-      best.pieces = collectPieces(best, prepared.get(best.key), text);
-    }
+    activeComparison = { prepared, text };
 
     statusElement.textContent = "Done";
   } finally {
@@ -360,6 +390,11 @@ async function runComparison() {
 }
 
 compareButton.addEventListener("click", runComparison);
+
+piecesSelect.addEventListener("change", () => {
+  selectedTokenizerKey = piecesSelect.value;
+  renderPieces();
+});
 
 document.querySelectorAll("[data-example]").forEach((button) => {
   button.addEventListener("click", () => {
