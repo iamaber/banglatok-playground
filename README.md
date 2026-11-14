@@ -87,12 +87,14 @@ The browser libraries are loaded from their CDNs at the versions written in the
 (nothing is installed with npm, and there is no build step);
 the maintenance-script versions and Python 3.12 are pinned in
 `scripts/requirements.txt` and `.python-version`. A
-Content-Security-Policy limits script sources and `fetch`/XHR destinations to
-this origin plus the two pinned CDN origins (`cdn.jsdelivr.net`, `esm.sh`),
-allows WebAssembly compilation, and disables plugins, frames, form submission
-and `<base>`. It is defence in depth, not a guarantee: the two CDN bundles
-still run with full page privileges, and the policy does not restrict
-navigation. The page's own code never sends pasted text anywhere.
+Content-Security-Policy limits script sources to this origin and the two pinned
+CDN origins (`cdn.jsdelivr.net`, `esm.sh`). `fetch`/XHR additionally allows
+Hugging Face's `*.hf.co` model-file CDN, which serves large bundled files after
+the Space redirects same-origin requests. The policy allows WebAssembly
+compilation and disables plugins, frames, form submission and `<base>`. It is
+defence in depth, not a guarantee: the two CDN bundles still run with full page
+privileges, and the policy does not restrict navigation. The page's own code
+never sends pasted text anywhere.
 
 ## Local development
 
